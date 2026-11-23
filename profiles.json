@@ -1,0 +1,18 @@
+[
+    {
+        "name": "Jane Doe",
+        "gender": "female",
+        "age": 75,
+        "nationality": "Nigeria",
+        "job": "Unemployed",
+        "highest_edu": "Elementary School"
+    },
+    {
+        "name": "John Doe",
+        "gender": "male",
+        "age": 100,
+        "nationality": "USA",
+        "job": "Unemployed",
+        "highest_edu": "Master's"
+    }
+]

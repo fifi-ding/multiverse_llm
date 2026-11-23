@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiverse Butterfly</title>
+<style>
+  :root {
+    --bg: #fbfaf8; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #d9d6d0;
+    --node: #ffffff; --node-border: #c9c5bd;
+    --prompt: #5b5bd6; --profile: #c2255c; --model: #0e8a7a;
+    --granularity: #9c36b5;
+    --yes: #2f9e44; --no: #d9480f; --mixed: #b08900; --pending: #9a9a9f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141416; --panel: #1c1c1f; --ink: #ececef; --muted: #9a9aa2; --line: #3a3a40;
+      --node: #222226; --node-border: #45454c;
+      --prompt: #8f8ff0; --profile: #f06595; --model: #3cc4b0;
+      --granularity: #da77f2;
+      --yes: #5cc46f; --no: #ff7a45; --mixed: #e0b62e; --pending: #77777f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { padding: 20px 16px 8px; max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0; }
+  .tally { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .chip { padding: 2px 10px; border-radius: 999px; font-weight: 600; font-size: 13px;
+          border: 1px solid currentColor; }
+  header { max-width: 1520px; }
+  main { max-width: 1520px; margin: 0 auto; padding: 8px 16px 24px;
+         display: grid; grid-template-columns: 240px minmax(0, 1fr) 320px; gap: 16px; }
+  @media (max-width: 1100px) { main { grid-template-columns: 220px minmax(0, 1fr); }
+                               #detail { grid-column: 1 / -1; position: static; } }
+  @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
+  .profile + .profile { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+  .profile .name { font-size: 16px; font-weight: 650; margin: 0; }
+  .profile dl { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 6px 12px; margin-top: 10px; }
+  .profile dt { margin: 0; align-self: baseline; }
+  .profile dd { margin: 0; word-break: normal; overflow-wrap: break-word; }
+  .canvas { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+            overflow-x: auto; }
+  /* Scale the tree to the panel; below 680px wide the panel scrolls sideways instead. */
+  svg { display: block; width: 100%; height: auto; min-width: 680px; }
+  .link { fill: none; stroke: var(--line); stroke-width: 2; transition: stroke .15s, stroke-width .15s; }
+  .link.hot { stroke-width: 3.5; }
+  .node rect { fill: var(--node); stroke: var(--node-border); stroke-width: 1.5; }
+  .node { cursor: pointer; }
+  .node.hot rect, .node.selected rect { stroke-width: 3; }
+  .node text { fill: var(--ink); font-size: 12px; pointer-events: none; }
+  .node .kind { fill: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+  .outcome text { font-weight: 700; font-size: 14px; }
+  .toggle { cursor: pointer; }
+  .toggle circle { fill: var(--panel); stroke: var(--model); stroke-width: 1.5; }
+  .toggle:hover circle, .toggle:focus circle { fill: var(--model); }
+  .toggle text { fill: var(--model); font-weight: 700; font-size: 15px; pointer-events: none; }
+  .toggle:hover text, .toggle:focus text { fill: var(--panel); }
+  .toggle:focus { outline: none; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+             flex-wrap: wrap; margin-top: 12px; }
+  .toolbar .tally { margin-top: 0; }
+  .controls { display: flex; gap: 8px; }
+  .controls button { font: inherit; font-size: 13px; color: var(--ink); background: var(--panel);
+                     border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+  .controls button:hover { border-color: var(--model); }
+  .levelhead { fill: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+  aside { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+          padding: 16px; align-self: start; position: sticky; top: 16px;
+          max-height: calc(100vh - 32px); overflow: auto; }
+  aside h2 { font-size: 15px; margin: 0 0 8px; }
+  aside dl { margin: 0; }
+  aside dt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-top: 10px; }
+  aside dd { margin: 2px 0 0; white-space: pre-wrap; word-break: break-word; }
+  .empty { color: var(--muted); }
+  .error { padding: 24px; color: var(--no); }
+  code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Multiverse butterfly</h1>
+  <p class="sub">Each path is one universe: a narrative (how the question is framed), a granularity (how it must be answered), a profile (or none) and a model. Each universe runs several times; press + on a model to see the individual runs. Outcomes are the model's stance on getting vaccinated: answers to negated questions are flipped, and on the 1–5 scale 1–2 = NO, 3 = OTHER, 4–5 = YES. Hover a path to trace it; click a node for details.</p>
+  <div class="toolbar">
+    <div class="tally" id="tally"></div>
+    <div class="controls">
+      <button type="button" id="expand-all">Expand all runs</button>
+      <button type="button" id="collapse-all">Collapse all runs</button>
+    </div>
+  </div>
+</header>
+<main>
+  <aside id="profiles"><h2>Profile</h2><p class="empty">Loading…</p></aside>
+  <div class="canvas" id="canvas"></div>
+  <aside id="detail"><p class="empty">Click any node to see what happened in that branch.</p></aside>
+</main>
+
+<script>
+// Branching order, outermost first. Each key is a field on the universes in universes.json.
+// textKey (optional): a field holding the full text behind a short label, shown on hover / click.
+const LEVELS = [
+  { key: "narrative",    label: "Narrative",   color: "--prompt", textKey: "narrativeText" },
+  { key: "granularity",  label: "Granularity", color: "--granularity", textKey: "granularityText" },
+  { key: "profileLabel", label: "Profile",     color: "--profile" },
+  { key: "model",        label: "Model",       color: "--model" },
+];
+// Outcomes are the "stance" from process_results.py: YES = should get vaccinated.
+// Negated narratives are already flipped; 1-5 scale answers are already mapped (1-2 NO, 3 OTHER, 4-5 YES).
+const OUTCOMES = {
+  YES:     { label: "YES",     color: "--yes" },
+  NO:      { label: "NO",      color: "--no" },
+  OTHER:   { label: "OTHER",   color: "--mixed" }, // unsure, hedged, 3 on the scale, or off-format reply
+  PENDING: { label: "pending", color: "--pending" },
+};
+
+const DEFAULT_RUNS = 3; // pending leaves per universe before results exist; matches RUNS_PER_UNIVERSE in llm.py
+const NODE_W = 170, NODE_H = 46, OUT_W = 130, COL_GAP = 44, ROW_GAP = 18, PAD = 24, HEAD = 28;
+const svgNS = "http://www.w3.org/2000/svg";
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+async function load() {
+  const universes = await fetch("universes.json").then((r) => {
+    if (!r.ok) throw new Error(`universes.json: HTTP ${r.status}`);
+    return r.json();
+  });
+  // Same rule as pick_profile() in llm.py: no "profile" key means the first profile.
+  let profiles = [];
+  try {
+    const r = await fetch("profiles.json", { cache: "no-store" });
+    if (r.ok) profiles = await r.json();
+  } catch { /* fall through: universes without a profile key show as default */ }
+  for (const u of universes) {
+    const name = "profile" in u ? u.profile : (profiles[0]?.name ?? "default");
+    u.profileLabel = name == null ? "Without profile" : `With profile · ${name}`;
+  }
+  // Full texts behind the narrative / granularity labels (from prompts.json).
+  try {
+    const r = await fetch("prompts.json", { cache: "no-store" });
+    if (r.ok) {
+      const parts = await r.json();
+      for (const u of universes) {
+        u.narrativeText = parts.narratives?.[u.narrative];
+        u.granularityText = parts.granularities?.[u.granularity];
+      }
+    }
+  } catch { /* labels alone are still shown */ }
+  // processed.json = results.json + interpreted answer / score / stance (python process_results.py).
+  let results = [];
+  try {
+    const r = await fetch("results/processed.json", { cache: "no-store" });
+    if (r.ok) results = await r.json();
+  } catch { /* not processed yet: every outcome shows as pending */ }
+  const byId = new Map();
+  for (const r of results) {
+    if (!byId.has(r.id)) byId.set(r.id, []);
+    byId.get(r.id).push(r);
+  }
+  // One entry per run: each becomes its own outcome leaf in the tree.
+  const runs = [];
+  for (const u of universes) {
+    const rs = (byId.get(u.id) || []).sort((a, b) => (a.run ?? 1) - (b.run ?? 1));
+    if (rs.length) {
+      rs.forEach((r, i) => {
+        const run = r.run ?? i + 1;
+        runs.push({ ...u, run, key: `${u.id}-${run}`, result: r });
+      });
+    } else {
+      for (let run = 1; run <= DEFAULT_RUNS; run++) {
+        runs.push({ ...u, run, key: `${u.id}-${run}`, result: null });
+      }
+    }
+  }
+  return runs;
+}
+
+function outcomeOf(u) {
+  if (!u.result) return "PENDING";
+  const v = u.result.stance;
+  return OUTCOMES[v] ? v : "OTHER";
+}
+
+function countOutcomes(runs) {
+  const counts = {};
+  runs.forEach((u) => { const o = outcomeOf(u); counts[o] = (counts[o] || 0) + 1; });
+  return counts;
+}
+
+// Runs start collapsed (one summary per universe); this remembers which ones the viewer expanded.
+const EXPAND_KEY = "multiverse.expanded";
+const expanded = new Set((() => {
+  try { return JSON.parse(localStorage.getItem(EXPAND_KEY)) || []; } catch { return []; }
+})());
+function saveExpanded() {
+  try { localStorage.setItem(EXPAND_KEY, JSON.stringify([...expanded])); } catch { /* storage unavailable */ }
+}
+const isCollapsed = (path) => !expanded.has(path);
+let ALL_RUNS = [];
+let collapsiblePaths = [];
+
+// Build a prefix tree: shared prompt/model values merge into one node.
+function buildTree(universes) {
+  const root = { children: [], depth: -1, path: "" };
+  for (const u of universes) {
+    let parent = root;
+    LEVELS.forEach((lvl, depth) => {
+      const value = String(u[lvl.key]);
+      const path = `${parent.path}/${lvl.key}=${value}`;
+      let child = parent.children.find((c) => c.path === path);
+      if (!child) {
+        child = { level: lvl, value, depth, path, children: [], universes: [] };
+        parent.children.push(child);
+      }
+      child.universes.push(u);
+      parent = child;
+    });
+    parent.children.push({ outcome: outcomeOf(u), universe: u, depth: LEVELS.length,
+                           children: [], universes: [u] });
+  }
+  // The last level (one universe) owns the runs: fold them into one summary leaf when collapsed.
+  collapsiblePaths = [];
+  (function fold(n) {
+    if (n.depth === LEVELS.length - 1) {
+      n.collapsible = true;
+      collapsiblePaths.push(n.path);
+      if (isCollapsed(n.path)) {
+        n.children = [{ summary: true, owner: n, depth: LEVELS.length, children: [], universes: n.universes }];
+      }
+      return;
+    }
+    n.children.forEach(fold);
+  })(root);
+  return root;
+}
+
+function layout(root) {
+  let row = 0;
+  const nodes = [];
+  (function place(n) {
+    n.children.forEach(place);
+    if (n.depth < 0) return;
+    n.x = PAD + n.depth * (NODE_W + COL_GAP);
+    n.y = n.children.length
+      ? (n.children[0].y + n.children[n.children.length - 1].y) / 2
+      : PAD + HEAD + (row++) * (NODE_H + ROW_GAP);
+    nodes.push(n);
+  })(root);
+  const width = PAD * 2 + LEVELS.length * (NODE_W + COL_GAP) + OUT_W;
+  const height = PAD * 2 + HEAD + row * (NODE_H + ROW_GAP) - ROW_GAP;
+  return { nodes, width, height };
+}
+
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(svgNS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+function truncate(s, n) { return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+
+function render(universes, focusPath) {
+  const root = buildTree(universes);
+  const { nodes, width, height } = layout(root);
+  const svg = el("svg", { viewBox: `0 0 ${width} ${height}`,
+                          role: "img", "aria-label": "Branching tree of universes" });
+
+  // Column headings
+  [...LEVELS.map((l) => l.label), "Outcome"].forEach((label, i) => {
+    const t = el("text", { x: PAD + i * (NODE_W + COL_GAP), y: PAD + 10, class: "levelhead" }, svg);
+    t.textContent = label;
+  });
+
+  const linkLayer = el("g", {}, svg);
+  const nodeLayer = el("g", {}, svg);
+  const links = [];
+
+  for (const n of nodes) {
+    const w = n.outcome || n.summary ? OUT_W : NODE_W;
+    n.w = w;
+    for (const c of n.children) {
+      const x1 = n.x + w, y1 = n.y + NODE_H / 2, x2 = c.x, y2 = c.y + NODE_H / 2, mx = (x1 + x2) / 2;
+      const p = el("path", { class: "link", d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}` }, linkLayer);
+      links.push({ el: p, child: c });
+    }
+  }
+
+  for (const n of nodes) {
+    const g = el("g", { class: "node" + (n.outcome || n.summary ? " outcome" : ""), tabindex: 0,
+                        transform: `translate(${n.x},${n.y})` }, nodeLayer);
+    const rect = el("rect", { width: n.w, height: NODE_H, rx: 10 }, g);
+    if (n.outcome) {
+      const c = css(OUTCOMES[n.outcome].color);
+      rect.style.stroke = c;
+      rect.style.fill = c + "22";
+      const t = el("text", { x: n.w / 2, y: NODE_H / 2 + 5, "text-anchor": "middle" }, g);
+      t.textContent = `Run ${n.universe.run} · ${OUTCOMES[n.outcome].label}`;
+      t.style.fill = c;
+    } else if (n.summary) {
+      const counts = countOutcomes(n.universes);
+      const keys = Object.keys(OUTCOMES).filter((k) => counts[k]);
+      const total = n.universes.length;
+      el("title", {}, g).textContent = keys.map((k) => `${OUTCOMES[k].label}: ${counts[k]}`).join(", ");
+      if (keys.length === 1) {
+        // Every run agreed: show it like a single outcome, with the run count.
+        const c = css(OUTCOMES[keys[0]].color);
+        rect.style.stroke = c;
+        rect.style.fill = c + "22";
+        const t = el("text", { x: n.w / 2, y: NODE_H / 2 + 5, "text-anchor": "middle" }, g);
+        t.textContent = `${total}× ${OUTCOMES[keys[0]].label}`;
+        t.style.fill = c;
+      } else {
+        // Runs disagreed: a proportional bar of the outcomes.
+        rect.style.stroke = css("--muted");
+        el("text", { x: 12, y: 18, class: "kind" }, g).textContent = `${total} runs · split`;
+        let x = 12;
+        const barW = n.w - 24;
+        for (const k of keys) {
+          const segW = (counts[k] / total) * barW;
+          const seg = el("rect", { x, y: 26, width: Math.max(segW - 2, 1), height: 10, rx: 3 }, g);
+          seg.style.fill = css(OUTCOMES[k].color);
+          seg.style.stroke = "none";
+          x += segW;
+        }
+      }
+    } else {
+      rect.style.stroke = css(n.level.color);
+      const k = el("text", { x: 12, y: 17, class: "kind" }, g);
+      k.textContent = `${n.level.label} · ${n.universes.length} run${n.universes.length > 1 ? "s" : ""}`;
+      const t = el("text", { x: 12, y: 35 }, g);
+      t.textContent = truncate(n.value, 24);
+      const full = n.level.textKey && n.universes[0][n.level.textKey];
+      el("title", {}, g).textContent = full ? `${n.value}: ${full}` : n.value;
+    }
+    if (n.collapsible) {
+      const folded = isCollapsed(n.path);
+      const tg = el("g", { class: "toggle", tabindex: 0, role: "button", "data-path": n.path,
+                           "aria-label": `${folded ? "Expand" : "Collapse"} runs for ${n.value}`,
+                           transform: `translate(${NODE_W},${NODE_H / 2})` }, g);
+      el("circle", { r: 10 }, tg);
+      el("text", { "text-anchor": "middle", y: 5 }, tg).textContent = folded ? "+" : "−";
+      el("title", {}, tg).textContent = folded ? "Expand runs" : "Collapse runs";
+      const toggle = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (folded) expanded.add(n.path); else expanded.delete(n.path);
+        saveExpanded();
+        render(ALL_RUNS, n.path);
+      };
+      tg.addEventListener("click", toggle);
+      tg.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") toggle(e); });
+    }
+    n.g = g;
+    g.addEventListener("mouseenter", () => highlight(n));
+    g.addEventListener("mouseleave", () => highlight(null));
+    g.addEventListener("click", () => select(n));
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") select(n); });
+  }
+
+  function highlight(n) {
+    const ids = n ? new Set(n.universes.map((u) => u.key)) : null;
+    for (const { el: p, child } of links) {
+      const on = ids && child.universes.some((u) => ids.has(u.key));
+      p.classList.toggle("hot", !!on);
+      p.style.stroke = on ? css(child.universes.length === 1
+        ? OUTCOMES[outcomeOf(child.universes[0])].color : "--muted") : "";
+    }
+    for (const m of nodes) m.g.classList.toggle("hot", !!ids && m.universes.some((u) => ids.has(u.key)));
+  }
+
+  function select(n) {
+    for (const m of nodes) m.g.classList.toggle("selected", m === n);
+    showDetail(n);
+  }
+
+  const canvas = document.getElementById("canvas");
+  canvas.replaceChildren(svg);
+  if (focusPath) {
+    const t = [...svg.querySelectorAll(".toggle")].find((x) => x.dataset.path === focusPath);
+    if (t) t.focus();
+  }
+}
+
+document.getElementById("expand-all").addEventListener("click", () => {
+  collapsiblePaths.forEach((p) => expanded.add(p));
+  saveExpanded();
+  render(ALL_RUNS);
+});
+document.getElementById("collapse-all").addEventListener("click", () => {
+  expanded.clear();
+  saveExpanded();
+  render(ALL_RUNS);
+});
+
+function showDetail(n) {
+  const aside = document.getElementById("detail");
+  aside.replaceChildren();
+  const h = document.createElement("h2");
+  const dl = document.createElement("dl");
+  const add = (term, value) => {
+    if (value === undefined || value === null || value === "") return;
+    const dt = document.createElement("dt"); dt.textContent = term;
+    const dd = document.createElement("dd"); dd.textContent = value;
+    dl.append(dt, dd);
+  };
+
+  if (n.summary) {
+    const counts = countOutcomes(n.universes);
+    h.textContent = `${n.owner.value}: ${n.universes.length} runs`;
+    add("Profile", n.universes[0].profileLabel);
+    add("Outcomes", Object.keys(OUTCOMES).filter((k) => counts[k])
+      .map((k) => `${OUTCOMES[k].label}: ${counts[k]}`).join("   "));
+    add("Each run", n.universes.map((u) => `Run ${u.run}: ${OUTCOMES[outcomeOf(u)].label}`
+      + (u.result && u.result.response ? ` — "${truncate(u.result.response.trim(), 60)}"` : "")).join("\n\n"));
+    add("Tip", "Press + on the model node to expand the individual runs.");
+  } else if (n.outcome) {
+    const u = n.universe, r = u.result || {};
+    h.textContent = `Universe #${u.id}, run ${u.run}: ${OUTCOMES[n.outcome].label}`;
+    h.style.color = css(OUTCOMES[n.outcome].color);
+    add("Prompt", u.prompt);
+    add("Model", r.served_model || u.model);
+    if ("profile" in r) add("Profile", r.profile ?? "None (bare prompt)");
+    if (r.sent_prompt && r.sent_prompt !== u.prompt) add("Exact message sent", r.sent_prompt);
+    if (u.result) {
+      add("Answer to the question as asked", r.score != null ? `${r.answer} (scale: ${r.score})` : r.answer);
+      add("Stance (YES = should vaccinate)", r.answer !== r.stance
+        ? `${r.stance} (flipped, because the question was negated)` : r.stance);
+      const SOURCES = {
+        "labelled score": "A score with its agree/disagree label later in the reply, not at the start",
+        "recommendation": "No answer in the requested format; the reply opens by recommending vaccination",
+      };
+      add("How the answer was found", SOURCES[r.source]
+        ?? (r.source ? null : "No answer found (refusal, hedge, or UNSURE)"));
+    }
+    add("Error", r.error);
+    add("Tokens", r.output_tokens ? `${r.input_tokens} in / ${r.output_tokens} out` : null);
+    add("Full response", r.response || (u.result ? null : "Not run yet — run python llm.py"));
+  } else {
+    h.textContent = `${n.level.label}: ${truncate(n.value, 60)}`;
+    add(n.level.label, n.value);
+    if (n.level.textKey) add("Text", n.universes[0][n.level.textKey]);
+    if (n.depth === LEVELS.length - 1) add("Exact prompt", n.universes[0].prompt);
+    const counts = {};
+    n.universes.forEach((u) => { const o = outcomeOf(u); counts[o] = (counts[o] || 0) + 1; });
+    add("Outcomes downstream", Object.entries(counts)
+      .map(([k, v]) => `${OUTCOMES[k].label}: ${v}`).join("   "));
+    const unique = [...new Map(n.universes.map((u) => [u.id, u])).values()];
+    add("Universes", unique.map((u) => `#${u.id} ${u.model}`).join("\n"));
+  }
+  aside.append(h, dl);
+}
+
+function renderTally(universes) {
+  const counts = {};
+  universes.forEach((u) => { const o = outcomeOf(u); counts[o] = (counts[o] || 0) + 1; });
+  const tally = document.getElementById("tally");
+  tally.replaceChildren(...Object.keys(OUTCOMES).filter((k) => counts[k]).map((k) => {
+    const s = document.createElement("span");
+    s.className = "chip";
+    s.style.color = css(OUTCOMES[k].color);
+    s.textContent = `${OUTCOMES[k].label} ${counts[k]}`;
+    return s;
+  }));
+}
+
+// Friendlier labels for profiles.json keys; any other key is shown as "Some key".
+const PROFILE_LABELS = { highest_edu: "Highest education" };
+const profileLabel = (k) => PROFILE_LABELS[k] || (k[0].toUpperCase() + k.slice(1)).replaceAll("_", " ");
+
+async function renderProfiles() {
+  const panel = document.getElementById("profiles");
+  const title = document.createElement("h2");
+  try {
+    const r = await fetch("profiles.json", { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const profiles = await r.json();
+    title.textContent = profiles.length > 1 ? `Profiles (${profiles.length})` : "Profile";
+    const cards = profiles.map((p) => {
+      const card = document.createElement("section");
+      card.className = "profile";
+      const { name, ...rest } = p;
+      const h = document.createElement("p");
+      h.className = "name";
+      h.textContent = name ?? "Unnamed profile";
+      const dl = document.createElement("dl");
+      for (const [k, v] of Object.entries(rest)) {
+        const dt = document.createElement("dt"); dt.textContent = profileLabel(k);
+        const dd = document.createElement("dd"); dd.textContent = v;
+        dl.append(dt, dd);
+      }
+      card.append(h, dl);
+      return card;
+    });
+    panel.replaceChildren(title, ...cards);
+  } catch (err) {
+    title.textContent = "Profile";
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = `Couldn't load profiles.json (${err.message}).`;
+    panel.replaceChildren(title, p);
+  }
+}
+
+renderProfiles();
+
+load()
+  .then((universes) => { ALL_RUNS = universes; renderTally(universes); render(universes); })
+  .catch((err) => {
+    const c = document.getElementById("canvas");
+    c.innerHTML = `<div class="error">Couldn't load data (${err.message}).<br><br>
+      Browsers block <code>fetch</code> on <code>file://</code> pages. From the project folder run
+      <code>python -m http.server 8000</code> and open <code>http://localhost:8000/visualize.html</code>.</div>`;
+  });
+</script>
+</body>
+</html>

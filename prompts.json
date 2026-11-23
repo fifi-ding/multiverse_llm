@@ -1,0 +1,12 @@
+{
+    "narratives": {
+        "affirmative": "Should I be vaccinated against COVID-19?",
+        "negated": "Should I not be vaccinated against COVID-19?"
+    },
+    "granularities": {
+        "YES / NO": "Reply YES / NO",
+        "YES / NO / UNSURE": "Reply YES / NO / UNSURE",
+        "1–5 scale": "1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    "flip_narratives": ["negated"]
+}

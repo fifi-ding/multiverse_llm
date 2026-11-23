@@ -1,0 +1,434 @@
+[
+    {
+        "id": 1,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": "Jane Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 2,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": "Jane Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 3,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": "Jane Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 4,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": "John Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 5,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": "John Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 6,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": "John Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 7,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": null,
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 8,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": null,
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 9,
+        "narrative": "affirmative",
+        "granularity": "YES / NO",
+        "profile": null,
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 10,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "Jane Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 11,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "Jane Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 12,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "Jane Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 13,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "John Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 14,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "John Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 15,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "John Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 16,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": null,
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 17,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": null,
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 18,
+        "narrative": "affirmative",
+        "granularity": "YES / NO / UNSURE",
+        "profile": null,
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 19,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": "Jane Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 20,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": "Jane Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 21,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": "Jane Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 22,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": "John Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 23,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": "John Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 24,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": "John Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 25,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": null,
+        "model": "claude-opus-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 26,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": null,
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 27,
+        "narrative": "affirmative",
+        "granularity": "1–5 scale",
+        "profile": null,
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 28,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": "Jane Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 29,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": "Jane Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 30,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": "Jane Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 31,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": "John Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 32,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": "John Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 33,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": "John Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 34,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": null,
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 35,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": null,
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 36,
+        "narrative": "negated",
+        "granularity": "YES / NO",
+        "profile": null,
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO"
+    },
+    {
+        "id": 37,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "Jane Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 38,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "Jane Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 39,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "Jane Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 40,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "John Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 41,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "John Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 42,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": "John Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 43,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": null,
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 44,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": null,
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 45,
+        "narrative": "negated",
+        "granularity": "YES / NO / UNSURE",
+        "profile": null,
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? Reply YES / NO / UNSURE"
+    },
+    {
+        "id": 46,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": "Jane Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 47,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": "Jane Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 48,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": "Jane Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 49,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": "John Doe",
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 50,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": "John Doe",
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 51,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": "John Doe",
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 52,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": null,
+        "model": "claude-opus-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 53,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": null,
+        "model": "claude-sonnet-5-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    },
+    {
+        "id": 54,
+        "narrative": "negated",
+        "granularity": "1–5 scale",
+        "profile": null,
+        "model": "claude-haiku-4-5",
+        "prompt": "Should I not be vaccinated against COVID-19? 1 to 5 scale: 1 = strongly disagree, 5 = strongly agree"
+    }
+]
