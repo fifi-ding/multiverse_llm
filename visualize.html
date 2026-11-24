@@ -67,6 +67,34 @@
                      border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px; cursor: pointer; }
   .controls button:hover { border-color: var(--model); }
   .levelhead { fill: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+  [hidden] { display: none !important; }
+  .controls { align-items: center; flex-wrap: wrap; }
+  .views { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .controls .views button { border: 0; border-radius: 0; }
+  .controls .views button + button { border-left: 1px solid var(--line); }
+  .controls .views button[aria-selected="true"] { background: var(--ink); color: var(--panel); }
+  .sort { font-size: 13px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+  .sort select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+                 border-radius: 8px; padding: 3px 8px; }
+  /* Specification curve */
+  .grid { stroke: var(--line); stroke-width: 1; }
+  .grid.mid { stroke-dasharray: 3 3; }
+  .grid.faint { stroke-opacity: .5; }
+  .axis { fill: var(--muted); font-size: 10px; }
+  .rowlabel { fill: var(--ink); font-size: 11px; }
+  .barcount { fill: var(--panel); font-size: 9px; font-weight: 700; }
+  .colbg { fill: transparent; }
+  .colbg.hot { fill: var(--line); fill-opacity: .35; }
+  .colbg.selected { fill: var(--line); fill-opacity: .7; }
+  .colhit { cursor: pointer; outline: none; }
+  /* Counterfactuals in the side panel */
+  .cf-list { list-style: none; padding: 0; margin: 4px 0 0; white-space: normal; }
+  .cf-list li { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; }
+  .cf-change { font-weight: 600; white-space: pre-wrap; }
+  .cf-check { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .cf-note { color: var(--muted); font-size: 12px; margin: 4px 0 0; white-space: normal; }
+  .cf-link { font: inherit; font-size: 12px; color: var(--prompt); background: none; border: 0; padding: 0;
+             text-decoration: underline; cursor: pointer; }
   aside { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
           padding: 16px; align-self: start; position: sticky; top: 16px;
           max-height: calc(100vh - 32px); overflow: auto; }
@@ -82,12 +110,25 @@
 <body>
 <header>
   <h1>Multiverse butterfly</h1>
-  <p class="sub">Each path is one universe: a narrative (how the question is framed), a granularity (how it must be answered), a profile (or none) and a model. Each universe runs several times; press + on a model to see the individual runs. Outcomes are the model's stance on getting vaccinated: answers to negated questions are flipped, and on the 1–5 scale 1–2 = NO, 3 = OTHER, 4–5 = YES. Hover a path to trace it; click a node for details.</p>
+  <p class="sub">Each universe is one combination of a narrative (how the question is framed), a granularity (how it must be answered), a profile (or none) and a model, run several times. Outcomes are the model's stance on getting vaccinated: answers to negated questions are flipped, and on the 1–5 scale 1–2 = NO, 3 = OTHER, 4–5 = YES.</p>
+  <p class="sub" id="view-hint"></p>
   <div class="toolbar">
     <div class="tally" id="tally"></div>
     <div class="controls">
-      <button type="button" id="expand-all">Expand all runs</button>
-      <button type="button" id="collapse-all">Collapse all runs</button>
+      <div class="views" role="tablist" aria-label="View">
+        <button type="button" role="tab" data-view="spec">Specification curve</button>
+        <button type="button" role="tab" data-view="tree">Tree</button>
+      </div>
+      <label class="sort" id="spec-controls">Sort
+        <select id="spec-sort">
+          <option value="share">by number of YES runs</option>
+          <option value="id">by universe id</option>
+        </select>
+      </label>
+      <span class="controls" id="tree-controls">
+        <button type="button" id="expand-all">Expand all runs</button>
+        <button type="button" id="collapse-all">Collapse all runs</button>
+      </span>
     </div>
   </div>
 </header>
@@ -120,6 +161,8 @@ const NODE_W = 170, NODE_H = 46, OUT_W = 130, COL_GAP = 44, ROW_GAP = 18, PAD = 
 const svgNS = "http://www.w3.org/2000/svg";
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
+let CF_BY_ID = null; // universe id -> DiCE explanation; null when counterfactuals.json is missing
+
 async function load() {
   const universes = await fetch("universes.json").then((r) => {
     if (!r.ok) throw new Error(`universes.json: HTTP ${r.status}`);
@@ -146,6 +189,11 @@ async function load() {
       }
     }
   } catch { /* labels alone are still shown */ }
+  // Optional DiCE counterfactuals (python counterfactuals.py), shown in the side panel.
+  try {
+    const r = await fetch("results/counterfactuals.json", { cache: "no-store" });
+    if (r.ok) CF_BY_ID = new Map((await r.json()).map((e) => [e.universe_id, e]));
+  } catch { /* not generated yet: the side panel says how */ }
   // processed.json = results.json + interpreted answer / score / stance (python process_results.py).
   let results = [];
   try {
@@ -404,16 +452,30 @@ function showDetail(n) {
     const dd = document.createElement("dd"); dd.textContent = value;
     dl.append(dt, dd);
   };
+  const addNode = (term, node) => {
+    const dt = document.createElement("dt"); dt.textContent = term;
+    const dd = document.createElement("dd"); dd.append(node);
+    dl.append(dt, dd);
+  };
 
   if (n.summary) {
+    const u0 = n.universes[0];
     const counts = countOutcomes(n.universes);
-    h.textContent = `${n.owner.value}: ${n.universes.length} runs`;
-    add("Profile", n.universes[0].profileLabel);
+    const withText = (label, text) => (text ? `${label}: ${text}` : label);
+    h.textContent = `Universe #${u0.id}: ${n.universes.length} runs`;
+    add("Narrative", withText(u0.narrative, u0.narrativeText));
+    add("Granularity", withText(u0.granularity, u0.granularityText));
+    add("Profile", u0.profileLabel);
+    add("Model", u0.model);
     add("Outcomes", Object.keys(OUTCOMES).filter((k) => counts[k])
       .map((k) => `${OUTCOMES[k].label}: ${counts[k]}`).join("   "));
+    addNode("What would make every run YES (DiCE)", counterfactualList(u0.id));
+    const excerpt = view === "spec" ? 280 : 60;
     add("Each run", n.universes.map((u) => `Run ${u.run}: ${OUTCOMES[outcomeOf(u)].label}`
-      + (u.result && u.result.response ? ` — "${truncate(u.result.response.trim(), 60)}"` : "")).join("\n\n"));
-    add("Tip", "Press + on the model node to expand the individual runs.");
+      + (u.result && u.result.response ? ` — "${truncate(u.result.response.trim(), excerpt)}"` : "")).join("\n\n"));
+    add("Tip", view === "tree"
+      ? "Press + on the model node to expand the individual runs."
+      : "For the full replies, switch to the Tree view and expand this universe.");
   } else if (n.outcome) {
     const u = n.universe, r = u.result || {};
     h.textContent = `Universe #${u.id}, run ${u.run}: ${OUTCOMES[n.outcome].label}`;
@@ -449,6 +511,68 @@ function showDetail(n) {
     add("Universes", unique.map((u) => `#${u.id} ${u.model}`).join("\n"));
   }
   aside.append(h, dl);
+}
+
+// DiCE counterfactuals for one universe, from results/counterfactuals.json.
+const CF_FEATURE_LABELS = { narrative: "Narrative", granularity: "Granularity", profile: "Profile", model: "Model" };
+
+function counterfactualList(id) {
+  const wrap = document.createElement("div");
+  const note = (text) => {
+    const p = document.createElement("p");
+    p.className = "cf-note";
+    p.textContent = text;
+    wrap.append(p);
+    return wrap;
+  };
+  if (!CF_BY_ID) return note("Not computed yet: run python counterfactuals.py, then reload.");
+  const e = CF_BY_ID.get(id);
+  if (!e) return note("Nothing to flip: every run of this universe was already YES.");
+  if (!e.counterfactuals.length) return note("DiCE found no change that makes every run YES.");
+
+  const ul = document.createElement("ul");
+  ul.className = "cf-list";
+  for (const cf of e.counterfactuals) {
+    const li = document.createElement("li");
+    const change = document.createElement("div");
+    change.className = "cf-change";
+    change.textContent = Object.entries(cf.changes)
+      .map(([f, v]) => `${CF_FEATURE_LABELS[f] ?? f}: ${v.from} → ${v.to}`).join("\n");
+    const check = document.createElement("div");
+    check.className = "cf-check";
+    if (cf.observed_runs) {
+      // "holds" = every observed run of the changed universe was YES (set by counterfactuals.py).
+      const holds = cf.holds ?? cf.observed_yes_runs === cf.observed_runs;
+      const link = document.createElement("button");
+      link.type = "button";
+      link.className = "cf-link";
+      link.textContent = `#${cf.universe_id}`;
+      link.title = "Show this universe";
+      link.addEventListener("click", () => selectUniverse(cf.universe_id));
+      const verdict = document.createElement("span");
+      verdict.textContent = holds ? "holds" : "doesn't hold";
+      verdict.style.color = css(holds ? "--yes" : "--no");
+      verdict.style.fontWeight = "600";
+      check.append(`Observed ${cf.observed_yes_runs}/${cf.observed_runs} YES in `, link, " · ", verdict);
+    } else {
+      check.textContent = "That combination was never run, so it can't be checked.";
+    }
+    li.append(change, check);
+    ul.append(li);
+  }
+  wrap.append(ul);
+  return note("DiCE");
+}
+
+// Jump to a universe: select its column in the spec curve, or just show it in the panel.
+let specPickers = new Map();
+function selectUniverse(id) {
+  if (view === "spec" && specPickers.has(id)) {
+    specPickers.get(id)(true);
+    return;
+  }
+  const runs = ALL_RUNS.filter((r) => r.id === id);
+  if (runs.length) showDetail({ summary: true, universes: runs });
 }
 
 function renderTally(universes) {
@@ -502,10 +626,224 @@ async function renderProfiles() {
   }
 }
 
+// ---------- Specification curve ----------
+// One column per universe. Top: share of its runs per outcome (stacked), sorted.
+// Bottom: a dot in the row of each choice that defines the universe; ids along the bottom.
+const readPref = (key, fallback) => { try { return localStorage.getItem(key) || fallback; } catch { return fallback; } };
+const writePref = (key, value) => { try { localStorage.setItem(key, value); } catch { /* storage unavailable */ } };
+let specSort = readPref("multiverse.specSort", "share");
+let specSelected = null;
+
+function renderSpec(runs) {
+  const canvas = document.getElementById("canvas");
+  const byUniverse = new Map();
+  for (const r of runs) {
+    if (!byUniverse.has(r.id)) byUniverse.set(r.id, []);
+    byUniverse.get(r.id).push(r);
+  }
+  const byId = [...byUniverse.values()].map((rs) => {
+    const counts = countOutcomes(rs);
+    const n = rs.length;
+    return { u: rs[0], runs: rs, counts, n,
+             yes: counts.YES || 0, no: counts.NO || 0, pending: counts.PENDING || 0 };
+  }).sort((a, b) => a.u.id - b.u.id);
+  // Curve order: most YES runs first; ties broken by fewer NO, then fewer pending, then id.
+  const cols = specSort === "id" ? byId : [...byId].sort((a, b) =>
+    b.yes - a.yes || a.no - b.no || a.pending - b.pending || a.u.id - b.u.id);
+
+  const LABEL_W = 200, PAD = 16, TITLE_H = 26, TOP_H = 160, GAP = 22, HEAD_H = 24, ROW_H = 18, ID_H = 34;
+  // Columns share the available width: 8–28px each; beyond that the panel scrolls sideways.
+  const avail = Math.max(canvas.clientWidth, 360) - LABEL_W - PAD;
+  const COL_W = Math.max(8, Math.min(28, Math.floor(avail / cols.length)));
+  const W = LABEL_W + COL_W * cols.length + PAD;
+  const colX = (i) => LABEL_W + i * COL_W;
+
+  // Bottom-panel rows: a header per choice, then one row per option (in universe-id order).
+  const rows = [];
+  for (const lvl of LEVELS) {
+    rows.push({ header: true, lvl });
+    const seen = [];
+    for (const c of byId) {
+      const v = String(c.u[lvl.key]);
+      if (!seen.includes(v)) seen.push(v);
+    }
+    for (const value of seen) {
+      const first = byId.find((c) => String(c.u[lvl.key]) === value);
+      rows.push({ lvl, value, text: lvl.textKey ? first.u[lvl.textKey] : null });
+    }
+  }
+  const topY = PAD + TITLE_H;
+  let y = topY + TOP_H + GAP;
+  for (const r of rows) { r.y = y; y += r.header ? HEAD_H : ROW_H; }
+  const idY = y + 4;
+  const H = idY + ID_H + PAD;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+                          "aria-label": "Specification curve: number of runs per outcome for each universe, with the choices defining each universe below" });
+  svg.style.width = `${W}px`;
+  svg.style.minWidth = "0";
+  const under = el("g", {}, svg);                               // column highlight
+  const content = el("g", { "pointer-events": "none" }, svg);   // bars, dots, grid
+  const labels = el("g", {}, svg);                              // row labels (hover shows full text)
+  const over = el("g", {}, svg);                                // column hit areas
+
+  // Top panel: axis and stacked bars.
+  // Y axis counts runs: 0 up to a round number at or above the most runs any universe has.
+  const maxRuns = Math.max(1, ...cols.map((c) => c.n));
+  const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000].find((s) => maxRuns / s <= 5)
+    ?? Math.ceil(maxRuns / 5);
+  const yMax = Math.ceil(maxRuns / step) * step;
+  const yOf = (count) => topY + TOP_H * (1 - count / yMax);
+  el("text", { x: PAD, y: PAD + 12, class: "levelhead" }, labels).textContent = "Number of runs";
+  for (let t = 0; t <= yMax; t += step) {
+    el("line", { x1: LABEL_W, x2: W - PAD, y1: yOf(t), y2: yOf(t), class: t === 0 ? "grid" : "grid faint" }, content);
+    el("text", { x: LABEL_W - 8, y: yOf(t) + 4, "text-anchor": "end", class: "axis" }, content).textContent = t;
+  }
+  const STACK = ["YES", "OTHER", "NO", "PENDING"]; // YES from the baseline, so its top edge is the curve
+  const barW = Math.max(2, COL_W - Math.max(2, Math.round(COL_W * 0.25)));
+  cols.forEach((c, i) => {
+    let acc = 0;
+    for (const k of STACK) {
+      const count = c.counts[k] || 0;
+      if (!count) continue;
+      const top = yOf(acc + count), h = yOf(acc) - top;
+      const x = colX(i) + (COL_W - barW) / 2;
+      const bar = el("rect", { x, y: top, width: barW, height: Math.max(h - 1, 0.5), rx: Math.min(2, barW / 4) }, content);
+      bar.style.fill = css(OUTCOMES[k].color);
+      // Write the count inside the segment when it fits.
+      const digits = String(count).length;
+      if (barW >= 4 + 4 * digits && h >= 13) {
+        const label = el("text", { x: x + barW / 2, y: top + h / 2 + 3, "text-anchor": "middle", class: "barcount" }, content);
+        label.style.fontSize = `${Math.min(10, barW / digits + 1)}px`;
+        label.textContent = count;
+      }
+      acc += count;
+    }
+  });
+
+  // Bottom panel: choice rows with a dot per universe.
+  for (const r of rows) {
+    if (r.header) {
+      el("line", { x1: PAD, x2: W - PAD, y1: r.y + 3, y2: r.y + 3, class: "grid" }, content);
+      const t = el("text", { x: PAD, y: r.y + 18, class: "levelhead" }, labels);
+      t.textContent = r.lvl.label;
+      t.style.fill = css(r.lvl.color);
+      continue;
+    }
+    const cy = r.y + ROW_H / 2;
+    el("line", { x1: LABEL_W, x2: W - PAD, y1: cy, y2: cy, class: "grid faint" }, content);
+    const t = el("text", { x: PAD + 10, y: cy + 4, class: "rowlabel" }, labels);
+    t.textContent = truncate(r.value, 28);
+    el("title", {}, t).textContent = r.text ? `${r.value}: ${r.text}` : r.value;
+    const color = css(r.lvl.color);
+    cols.forEach((c, i) => {
+      if (String(c.u[r.lvl.key]) !== r.value) return;
+      const dot = el("circle", { cx: colX(i) + COL_W / 2, cy, r: Math.max(2.5, Math.min(4.5, COL_W / 2 - 1.5)) }, content);
+      dot.style.fill = color;
+    });
+  }
+
+  // Universe ids, aligned with the columns (rotated when columns are narrow).
+  el("text", { x: PAD, y: idY + 16, class: "levelhead" }, labels).textContent = "Universe id";
+  cols.forEach((c, i) => {
+    const x = colX(i) + COL_W / 2;
+    const t = el("text", { class: "axis" }, content);
+    t.textContent = c.u.id;
+    const attrs = COL_W >= 22
+      ? { x, y: idY + 16, "text-anchor": "middle" }
+      // Rotated -90°: with anchor "end" the text hangs downward from (x, idY + 4).
+      : { x, y: idY + 4, dy: "0.35em", "text-anchor": "end", transform: `rotate(-90 ${x} ${idY + 4})` };
+    for (const [k, v] of Object.entries(attrs)) t.setAttribute(k, v);
+    if (COL_W < 11) t.style.fontSize = `${COL_W - 0.5}px`; // keep rotated ids from overlapping
+  });
+
+  // Column hover / click: highlight the whole column, show the universe in the side panel.
+  const colTop = topY - 8, colH = idY + ID_H - colTop;
+  specPickers = new Map();
+  cols.forEach((c, i) => {
+    const bg = el("rect", { x: colX(i), y: colTop, width: COL_W, height: colH,
+                            class: "colbg" + (specSelected === c.u.id ? " selected" : "") }, under);
+    const hit = el("rect", { x: colX(i), y: colTop, width: COL_W, height: colH, fill: "transparent",
+                             class: "colhit", tabindex: 0, role: "button",
+                             "aria-label": `Universe ${c.u.id}` }, over);
+    const outcomeText = Object.keys(OUTCOMES).filter((k) => c.counts[k])
+      .map((k) => `${OUTCOMES[k].label} ${c.counts[k]}`).join(", ");
+    el("title", {}, hit).textContent =
+      `Universe #${c.u.id}\n${LEVELS.map((l) => `${l.label}: ${c.u[l.key]}`).join("\n")}\n${outcomeText}`;
+    hit.addEventListener("mouseenter", () => bg.classList.add("hot"));
+    hit.addEventListener("mouseleave", () => bg.classList.remove("hot"));
+    // reveal: also scroll the column into view (used when jumping here from a counterfactual).
+    const pick = (reveal = false) => {
+      specSelected = c.u.id;
+      under.querySelectorAll(".colbg.selected").forEach((b) => b.classList.remove("selected"));
+      bg.classList.add("selected");
+      showDetail({ summary: true, universes: c.runs });
+      document.getElementById("detail").scrollTop = 0;
+      if (reveal && canvas.scrollWidth > canvas.clientWidth) {
+        canvas.scrollTo({ left: colX(i) - canvas.clientWidth / 2, behavior: "smooth" });
+      }
+    };
+    specPickers.set(c.u.id, pick);
+    hit.addEventListener("click", () => pick());
+    hit.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  });
+
+  canvas.replaceChildren(svg);
+}
+
+// ---------- View switching ----------
+let view = readPref("multiverse.view", "spec");
+const VIEW_HINTS = {
+  spec: "Top: how many of each universe's runs gave each outcome, sorted into a spectrum. Bottom: the choices that define each universe, in the same column. Hover a column to highlight it; click it for details.",
+  tree: "Hover a path to trace it; click a node for details; press + on a model to see the individual runs.",
+};
+const DETAIL_HINTS = {
+  spec: "Click a column to see that universe.",
+  tree: "Click any node to see what happened in that branch.",
+};
+
+function renderView() {
+  document.querySelectorAll(".views button").forEach((b) =>
+    b.setAttribute("aria-selected", String(b.dataset.view === view)));
+  document.getElementById("spec-controls").hidden = view !== "spec";
+  document.getElementById("tree-controls").hidden = view !== "tree";
+  document.getElementById("view-hint").textContent = VIEW_HINTS[view];
+  if (view === "spec") renderSpec(ALL_RUNS); else render(ALL_RUNS);
+}
+
+function resetDetail() {
+  const p = document.createElement("p");
+  p.className = "empty";
+  p.textContent = DETAIL_HINTS[view];
+  document.getElementById("detail").replaceChildren(p);
+}
+
+document.querySelectorAll(".views button").forEach((b) => b.addEventListener("click", () => {
+  if (view === b.dataset.view) return;
+  view = b.dataset.view;
+  writePref("multiverse.view", view);
+  specSelected = null;
+  resetDetail();
+  renderView();
+}));
+const sortSelect = document.getElementById("spec-sort");
+sortSelect.value = specSort;
+sortSelect.addEventListener("change", () => {
+  specSort = sortSelect.value;
+  writePref("multiverse.specSort", specSort);
+  renderSpec(ALL_RUNS);
+});
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if (view === "spec" && ALL_RUNS.length) renderSpec(ALL_RUNS); }, 150);
+});
+
 renderProfiles();
+resetDetail();
 
 load()
-  .then((universes) => { ALL_RUNS = universes; renderTally(universes); render(universes); })
+  .then((universes) => { ALL_RUNS = universes; renderTally(universes); renderView(); })
   .catch((err) => {
     const c = document.getElementById("canvas");
     c.innerHTML = `<div class="error">Couldn't load data (${err.message}).<br><br>

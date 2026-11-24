@@ -1,0 +1,470 @@
+[
+  {
+    "universe_id": 15,
+    "choices": {
+      "narrative": "affirmative",
+      "granularity": "YES / NO / UNSURE",
+      "profile": "John Doe",
+      "model": "claude-haiku-4-5"
+    },
+    "observed_yes_runs": 0,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.042,
+    "counterfactuals": [
+      {
+        "changes": {
+          "profile": {
+            "from": "John Doe",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 12,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "granularity": {
+            "from": "YES / NO / UNSURE",
+            "to": "YES / NO"
+          },
+          "profile": {
+            "from": "John Doe",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 3,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "profile": {
+            "from": "John Doe",
+            "to": "Jane Doe"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-opus-5-5"
+          }
+        },
+        "universe_id": 10,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  },
+  {
+    "universe_id": 16,
+    "choices": {
+      "narrative": "affirmative",
+      "granularity": "YES / NO / UNSURE",
+      "profile": "none",
+      "model": "claude-opus-5-5"
+    },
+    "observed_yes_runs": 1,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.342,
+    "counterfactuals": [
+      {
+        "changes": {
+          "narrative": {
+            "from": "affirmative",
+            "to": "negated"
+          },
+          "granularity": {
+            "from": "YES / NO / UNSURE",
+            "to": "1–5 scale"
+          }
+        },
+        "universe_id": 52,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "narrative": {
+            "from": "affirmative",
+            "to": "negated"
+          },
+          "model": {
+            "from": "claude-opus-5-5",
+            "to": "claude-sonnet-5-5"
+          }
+        },
+        "universe_id": 44,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "profile": {
+            "from": "none",
+            "to": "John Doe"
+          },
+          "model": {
+            "from": "claude-opus-5-5",
+            "to": "claude-sonnet-5-5"
+          }
+        },
+        "universe_id": 14,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  },
+  {
+    "universe_id": 17,
+    "choices": {
+      "narrative": "affirmative",
+      "granularity": "YES / NO / UNSURE",
+      "profile": "none",
+      "model": "claude-sonnet-5-5"
+    },
+    "observed_yes_runs": 0,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.042,
+    "counterfactuals": [
+      {
+        "changes": {
+          "profile": {
+            "from": "none",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 11,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "narrative": {
+            "from": "affirmative",
+            "to": "negated"
+          },
+          "profile": {
+            "from": "none",
+            "to": "John Doe"
+          }
+        },
+        "universe_id": 41,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "granularity": {
+            "from": "YES / NO / UNSURE",
+            "to": "YES / NO"
+          },
+          "profile": {
+            "from": "none",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 2,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  },
+  {
+    "universe_id": 18,
+    "choices": {
+      "narrative": "affirmative",
+      "granularity": "YES / NO / UNSURE",
+      "profile": "none",
+      "model": "claude-haiku-4-5"
+    },
+    "observed_yes_runs": 1,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.353,
+    "counterfactuals": [
+      {
+        "changes": {
+          "profile": {
+            "from": "none",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 12,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "profile": {
+            "from": "none",
+            "to": "John Doe"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-sonnet-5-5"
+          }
+        },
+        "universe_id": 14,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "narrative": {
+            "from": "affirmative",
+            "to": "negated"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-sonnet-5-5"
+          }
+        },
+        "universe_id": 44,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  },
+  {
+    "universe_id": 24,
+    "choices": {
+      "narrative": "affirmative",
+      "granularity": "1–5 scale",
+      "profile": "John Doe",
+      "model": "claude-haiku-4-5"
+    },
+    "observed_yes_runs": 2,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.667,
+    "counterfactuals": [
+      {
+        "changes": {
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-sonnet-5-5"
+          }
+        },
+        "universe_id": 23,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "granularity": {
+            "from": "1–5 scale",
+            "to": "YES / NO"
+          },
+          "profile": {
+            "from": "John Doe",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 3,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "granularity": {
+            "from": "1–5 scale",
+            "to": "YES / NO"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-opus-5-5"
+          }
+        },
+        "universe_id": 4,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  },
+  {
+    "universe_id": 27,
+    "choices": {
+      "narrative": "affirmative",
+      "granularity": "1–5 scale",
+      "profile": "none",
+      "model": "claude-haiku-4-5"
+    },
+    "observed_yes_runs": 0,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.034,
+    "counterfactuals": [
+      {
+        "changes": {
+          "profile": {
+            "from": "none",
+            "to": "John Doe"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-sonnet-5-5"
+          }
+        },
+        "universe_id": 23,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "narrative": {
+            "from": "affirmative",
+            "to": "negated"
+          },
+          "granularity": {
+            "from": "1–5 scale",
+            "to": "YES / NO / UNSURE"
+          }
+        },
+        "universe_id": 45,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "granularity": {
+            "from": "1–5 scale",
+            "to": "YES / NO"
+          },
+          "profile": {
+            "from": "none",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 3,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  },
+  {
+    "universe_id": 51,
+    "choices": {
+      "narrative": "negated",
+      "granularity": "1–5 scale",
+      "profile": "John Doe",
+      "model": "claude-haiku-4-5"
+    },
+    "observed_yes_runs": 0,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.039,
+    "counterfactuals": [
+      {
+        "changes": {
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-opus-5-5"
+          }
+        },
+        "universe_id": 49,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "granularity": {
+            "from": "1–5 scale",
+            "to": "YES / NO"
+          }
+        },
+        "universe_id": 33,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "narrative": {
+            "from": "negated",
+            "to": "affirmative"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-opus-5-5"
+          }
+        },
+        "universe_id": 22,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  },
+  {
+    "universe_id": 54,
+    "choices": {
+      "narrative": "negated",
+      "granularity": "1–5 scale",
+      "profile": "none",
+      "model": "claude-haiku-4-5"
+    },
+    "observed_yes_runs": 1,
+    "observed_runs": 3,
+    "predicted_p_yes": 0.333,
+    "counterfactuals": [
+      {
+        "changes": {
+          "profile": {
+            "from": "none",
+            "to": "Jane Doe"
+          }
+        },
+        "universe_id": 48,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "narrative": {
+            "from": "negated",
+            "to": "affirmative"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-sonnet-5-5"
+          }
+        },
+        "universe_id": 26,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      },
+      {
+        "changes": {
+          "granularity": {
+            "from": "1–5 scale",
+            "to": "YES / NO"
+          },
+          "model": {
+            "from": "claude-haiku-4-5",
+            "to": "claude-opus-5-5"
+          }
+        },
+        "universe_id": 34,
+        "observed_yes_runs": 3,
+        "observed_runs": 3,
+        "holds": true
+      }
+    ]
+  }
+]

@@ -12,6 +12,12 @@ dev = [
     "pyright",
     "pre-commit",
 ]
+# Counterfactual analysis (counterfactuals.py): pip install --group analysis
+analysis = [
+    "dice-ml",
+    "pandas",
+    "scikit-learn",
+]
 
 [tool.ruff]
 target-version = "py312"
